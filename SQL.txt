@@ -1,0 +1,18 @@
+ ****					 ****
+	Javier Andres Herrera Manjarrez
+
+CREATE DATABASE `escuela`;
+
+
+CREATE TABLE `escuelas` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(200) NOT NULL,
+  `fecha` date NOT NULL,
+  `cantidadalumnos` int(11) NOT NULL,
+  `area` float NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `telefono` varchar(15) NOT NULL,
+  `direccion` text NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `escuelas_un` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=latin1;
