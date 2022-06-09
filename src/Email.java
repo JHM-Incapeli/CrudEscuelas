@@ -1,14 +1,21 @@
 
+import java.io.File;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 /*
@@ -33,6 +40,8 @@ public class Email extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jFileChooser1 = new javax.swing.JFileChooser();
+        jFileChooser2 = new javax.swing.JFileChooser();
         txtResive = new javax.swing.JTextField();
         txtAsunto = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -74,18 +83,21 @@ public class Email extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(32, 32, 32)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(txtResive)
-                                .addComponent(txtAsunto, javax.swing.GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE))
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 440, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
                         .addGap(196, 196, 196)
-                        .addComponent(enviar)))
+                        .addComponent(enviar))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(32, 32, 32)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 440, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(txtResive)
+                                        .addComponent(txtAsunto, javax.swing.GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE))
+                                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(155, 155, 155)))))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -99,7 +111,7 @@ public class Email extends javax.swing.JDialog {
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtAsunto, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 14, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -126,30 +138,49 @@ public class Email extends javax.swing.JDialog {
         String Asunto = txtAsunto.getText();
         String contenido = txtConteneido.getText();
         try {
-           
+            JFileChooser abrir = new JFileChooser();
+             int ceroOUno = abrir.showOpenDialog(null);
+             File ruta= abrir.getSelectedFile();
+             String fileName= abrir.getSelectedFile().getName();
+            
             Properties p = new Properties();
-            p.put("mail.smtp.host", "smtp.gmail.com");
-            p.setProperty("mail.smtp.starttls.enable", "true");
-            p.put("mail.smtp.ssl.trust", "smtp.gmail.com");
-            p.setProperty("mail.smtp.port", "587");
-            p.setProperty("mail.smtp.user", correo);
-            p.setProperty("mail.smtp.auth", "true");
-            p.setProperty("mail.smtp.ssl.protocols", "TLSv1.2");
+              p.put("mail.smtp.host", "smtp.gmail.com");
+              p.setProperty("mail.smtp.starttls.enable", "true");
+              p.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+              p.setProperty("mail.smtp.port", "587");
+              p.setProperty("mail.smtp.user", correo);
+              p.setProperty("mail.smtp.auth", "true");
+              p.setProperty("mail.smtp.ssl.protocols", "TLSv1.2");
             
             Session s = Session.getDefaultInstance(p);
+            // para enviar enviar archivos adjuntos
+            BodyPart texto = new MimeBodyPart();
+            //El texto del mensaje lo enviaremos mediante este objeto
+             texto.setText(contenido);
+            BodyPart adjunto = new MimeBodyPart();
+              adjunto.setDataHandler(new DataHandler(new FileDataSource(ruta)));
+              adjunto.setFileName(fileName);
+            
+            MimeMultipart m = new MimeMultipart();
+              m.addBodyPart(texto);
+              m.addBodyPart(adjunto);
+            
+            //***********************************************
+            
             MimeMessage mensaje = new MimeMessage(s);
-            mensaje.setFrom(new InternetAddress(correo));
-            mensaje.addRecipient(Message.RecipientType.TO, new InternetAddress(destinatario));
-            mensaje.setSubject(Asunto);
-            mensaje.setText(contenido);
+              mensaje.setFrom(new InternetAddress(correo));
+              mensaje.addRecipient(Message.RecipientType.TO, new InternetAddress(destinatario));
+              mensaje.setSubject(Asunto);
+              mensaje.setContent(m);
              /*
             Protocolo para tranferecnica cimple de email smtp
             */
             Transport t = s.getTransport("smtp");
-            t.connect(correo, contra);
-            t.sendMessage(mensaje, mensaje.getAllRecipients());
-            t.close();
+             t.connect(correo, contra);
+             t.sendMessage(mensaje, mensaje.getAllRecipients());
+             t.close();
             JOptionPane.showMessageDialog(null, "Mensaje enviado");
+            dispose();
         } catch (MessagingException e) {
             JOptionPane.showMessageDialog(null, "Error al enviar" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -158,6 +189,8 @@ public class Email extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton enviar;
+    private javax.swing.JFileChooser jFileChooser1;
+    private javax.swing.JFileChooser jFileChooser2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
